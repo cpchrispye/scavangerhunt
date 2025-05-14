@@ -133,12 +133,27 @@
             overflow: hidden;
             border-radius: 8px;
             border: none;
+            position: relative;
+            cursor: pointer;
         }
 
-        .success-link iframe {
+        .success-link img {
             width: 100%;
             height: 100%;
-            border: none;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .success-link .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 8px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
         }
 
         .disabled {
@@ -164,7 +179,7 @@
         <div id="success-container" class="hidden">
             <p id="success-text" class="success-message"></p>
             <div id="success-link-container" class="hidden">
-                <iframe id="success-link-frame" class="success-link"></iframe>
+                <!-- Success link content will be dynamically inserted here -->
             </div>
         </div>
     </div>
@@ -274,13 +289,48 @@
                 const successLinkContainer = document.getElementById('success-link-container');
                 successLinkContainer.classList.remove('hidden');
                 
-                const iframe = document.getElementById('success-link-frame');
-                iframe.src = questionData.success_link;
+                // Create link container with preview
+                const linkElement = document.createElement('div');
+                linkElement.className = 'success-link';
                 
-                // Add click handler to open link in new tab
-                iframe.addEventListener('click', function() {
+                // Determine if it's a map link or an image
+                const isMap = questionData.success_link.includes('google.com/maps');
+                
+                // Create image element (either map preview or direct image)
+                const imgElement = document.createElement('img');
+                
+                if (isMap) {
+                    // For Google Maps, create a static map preview
+                    const mapUrl = new URL(questionData.success_link);
+                    const searchQuery = mapUrl.searchParams.get('search') || 
+                                       mapUrl.pathname.split('/').pop() || 
+                                       'location';
+                    
+                    // Use Google Static Maps API or a placeholder
+                    imgElement.src = `https://maps.googleapis.com/maps/api/staticmap?center=${searchQuery}&zoom=14&size=600x400&maptype=roadmap`;
+                    imgElement.alt = `Map to ${searchQuery}`;
+                    
+                    // Add hint overlay for maps
+                    const overlay = document.createElement('div');
+                    overlay.className = 'overlay';
+                    overlay.textContent = 'Click to open map';
+                    linkElement.appendChild(overlay);
+                } else {
+                    // For regular images, display directly
+                    imgElement.src = questionData.success_link;
+                    imgElement.alt = 'Success image';
+                }
+                
+                linkElement.appendChild(imgElement);
+                
+                // Add click handler
+                linkElement.addEventListener('click', function() {
                     window.open(questionData.success_link, '_blank');
                 });
+                
+                // Add to container
+                successLinkContainer.innerHTML = '';
+                successLinkContainer.appendChild(linkElement);
             }
         }
 
