@@ -155,6 +155,67 @@
             font-size: 14px;
             text-align: center;
         }
+        
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-placeholder:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(66, 133, 244, 0.1),
+                rgba(66, 133, 244, 0.1) 10px,
+                rgba(219, 237, 255, 0.3) 10px,
+                rgba(219, 237, 255, 0.3) 20px
+            );
+        }
+        
+        .map-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            color: #4285F4;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .map-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4285F4;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .location-text {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #555;
+            text-transform: capitalize;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            max-width: 80%;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
 
         .disabled {
             opacity: 0.7;
@@ -296,32 +357,41 @@
                 // Determine if it's a map link or an image
                 const isMap = questionData.success_link.includes('google.com/maps');
                 
-                // Create image element (either map preview or direct image)
-                const imgElement = document.createElement('img');
-                
                 if (isMap) {
-                    // For Google Maps, create a static map preview
-                    const mapUrl = new URL(questionData.success_link);
-                    const searchQuery = mapUrl.searchParams.get('search') || 
-                                       mapUrl.pathname.split('/').pop() || 
-                                       'location';
+                    // For Google Maps, create a map placeholder with icon
+                    linkElement.innerHTML = `
+                        <div class="map-placeholder">
+                            <div class="map-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="map-text">Click to open map location</div>
+                        </div>
+                    `;
                     
-                    // Use Google Static Maps API or a placeholder
-                    imgElement.src = `https://maps.googleapis.com/maps/api/staticmap?center=${searchQuery}&zoom=14&size=600x400&maptype=roadmap`;
-                    imgElement.alt = `Map to ${searchQuery}`;
-                    
-                    // Add hint overlay for maps
-                    const overlay = document.createElement('div');
-                    overlay.className = 'overlay';
-                    overlay.textContent = 'Click to open map';
-                    linkElement.appendChild(overlay);
+                    // Extract location from URL for display
+                    try {
+                        const mapUrl = new URL(questionData.success_link);
+                        const searchQuery = mapUrl.searchParams.get('search') || 
+                                          mapUrl.pathname.split('/').pop() || 
+                                          'location';
+                        
+                        const locationText = document.createElement('div');
+                        locationText.className = 'location-text';
+                        locationText.textContent = searchQuery.replace(/\+/g, ' ');
+                        linkElement.querySelector('.map-placeholder').appendChild(locationText);
+                    } catch (e) {
+                        console.error('Error parsing map URL:', e);
+                    }
                 } else {
                     // For regular images, display directly
+                    const imgElement = document.createElement('img');
                     imgElement.src = questionData.success_link;
                     imgElement.alt = 'Success image';
+                    linkElement.appendChild(imgElement);
                 }
-                
-                linkElement.appendChild(imgElement);
                 
                 // Add click handler
                 linkElement.addEventListener('click', function() {
