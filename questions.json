@@ -14,7 +14,7 @@
     "answers": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "John Glenn"],
     "answer": 1,
     "success_text": "Well done! Your next stop is the downtown library.",
-    "success_link": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Library_of_Congress_Main_Reading_Room.jpg"
+    "success_link": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Neil_Armstrong_pose.jpg"
   },
   "q3": {
     "title": "Local Knowledge",
