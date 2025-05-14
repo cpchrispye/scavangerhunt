@@ -1,0 +1,44 @@
+{
+  "q1": {
+    "title": "City Landmarks",
+    "question": "What famous bridge has towers that are 746 feet tall and was completed in 1937?",
+    "type": "text",
+    "answer": "Golden Gate Bridge",
+    "success_text": "Correct! Head to the nearest park entrance.",
+    "success_link": "https://www.google.com/maps/search/nearest+park"
+  },
+  "q2": {
+    "title": "Historical Figures",
+    "question": "Who was the first person to step foot on the moon?",
+    "type": "radio",
+    "answers": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "John Glenn"],
+    "answer": 1,
+    "success_text": "Well done! Your next stop is the downtown library.",
+    "success_link": "https://www.google.com/maps/search/library"
+  },
+  "q3": {
+    "title": "Local Knowledge",
+    "question": "What is the name of the oldest cafe in town?",
+    "type": "text",
+    "answer": "Morning Brew",
+    "success_text": "That's right! Now head to the town square.",
+    "success_link": "https://www.google.com/maps/search/town+square"
+  },
+  "q4": {
+    "title": "Science Challenge",
+    "question": "Which of these is NOT one of the four fundamental forces of nature?",
+    "type": "radio",
+    "answers": ["Gravity", "Electromagnetic force", "Strong nuclear force", "Centrifugal force"],
+    "answer": 3,
+    "success_text": "Excellent! Now find the nearest museum.",
+    "success_link": "https://www.google.com/maps/search/museum"
+  },
+  "q5": {
+    "title": "Final Challenge",
+    "question": "What year was the Declaration of Independence signed?",
+    "type": "text",
+    "answer": "1776",
+    "success_text": "Congratulations! You've completed the scavenger hunt! Here's your final destination.",
+    "success_link": "https://www.google.com/maps/search/restaurant"
+  }
+}
