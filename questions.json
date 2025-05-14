@@ -14,7 +14,7 @@
     "answers": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "John Glenn"],
     "answer": 1,
     "success_text": "Well done! Your next stop is the downtown library.",
-    "success_link": "https://www.google.com/maps/search/library"
+    "success_link": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Library_of_Congress_Main_Reading_Room.jpg"
   },
   "q3": {
     "title": "Local Knowledge",
@@ -31,7 +31,7 @@
     "answers": ["Gravity", "Electromagnetic force", "Strong nuclear force", "Centrifugal force"],
     "answer": 3,
     "success_text": "Excellent! Now find the nearest museum.",
-    "success_link": "https://www.google.com/maps/search/museum"
+    "success_link": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Exterior_of_the_British_Museum%2C_London%2C_UK_-_Diliff.jpg"
   },
   "q5": {
     "title": "Final Challenge",
