@@ -370,21 +370,6 @@
                             <div class="map-text">Click to open map location</div>
                         </div>
                     `;
-                    
-                    // Extract location from URL for display
-                    try {
-                        const mapUrl = new URL(questionData.success_link);
-                        const searchQuery = mapUrl.searchParams.get('search') || 
-                                          mapUrl.pathname.split('/').pop() || 
-                                          'location';
-                        
-                        const locationText = document.createElement('div');
-                        locationText.className = 'location-text';
-                        locationText.textContent = searchQuery.replace(/\+/g, ' ');
-                        linkElement.querySelector('.map-placeholder').appendChild(locationText);
-                    } catch (e) {
-                        console.error('Error parsing map URL:', e);
-                    }
                 } else {
                     // For regular images, display directly
                     const imgElement = document.createElement('img');
