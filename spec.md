@@ -6,6 +6,7 @@ submit
 
 the will be a json file call questions.json next to the html file in the format of
 
+```
 {
 	q1:{
 		title:"my title",
@@ -25,6 +26,7 @@ the will be a json file call questions.json next to the html file in the format 
 		success_link: "link_to_google_maps",
 	}
 }
+```
 
 if the submitted answer is wrong the submit button should go red until the answer is changed then it resets to the default colour. the button should disappear on success, and the input should be locked.
 text answers should have the inpur stripped of preccedding and trailing whitespace, and all answers should be compared in lowercase.
@@ -34,3 +36,7 @@ if no arg is given show the first question.
 
 the success_link is optional, it could be a picture or a map link, it should be displayed after the success text. in a frame, clicking on it should open up the link. the link should make good use of teh space remaining.
  this will be hosted on github pages, so it must be static, ideally vanialla JS, css html, all inlined in the html.
+
+
+Note:
+an addtional requirement for a password to the index html file in the for ?p=thismypasswrd123. the json file should be encrypted based on the password.  can you make another html doc that allow me to open a plain json file and then encrypt it and save it on my pc. then if the password is given to the index.html it should beable to use it to decrypted the json, if not treat it as a plain file. im not sure what way you should encrypt it, so have a think maybe JWE? but it must not rely on the server and instead all be done in the browser. also encrypted json would have the file name questions.enc.json.
