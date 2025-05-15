@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scavenger Hunt - JSON Encryption Tool</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --error-color: #f44336;
+            --text-color: #333;
+            --background-color: #f9f9f9;
+            --card-background: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin-top: 20px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .file-input-label:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .status.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .status.error {
+            background-color: rgba(244, 67, 54, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.3s;
+            margin-right: 0;
+            margin-bottom: 0;
+        }
+
+        .tab-button.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scavenger Hunt - JSON Encryption Tool</h1>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="encrypt-tab">Encrypt JSON</button>
+                <button class="tab-button" data-tab="decrypt-tab">Decrypt & Verify</button>
+                <button class="tab-button" data-tab="help-tab">Help</button>
+            </div>
+            
+            <div id="encrypt-tab" class="tab-content active">
+                <h2>Encrypt JSON File</h2>
+                <p>Upload your questions.json file and set a password to encrypt it.</p>
+                
+                <div class="file-input-container">
+                    <label class="file-input-label">
+                        Choose JSON File
+                        <input type="file" id="json-file" class="file-input" accept="application/json">
+                    </label>
+                    <div id="file-name" class="file-name">No file selected</div>
+                </div>
+                
+                <div>
+                    <label for="password">Encryption Password:</label>
+                    <input type="password" id="password" placeholder="Enter a secure password">
+                </div>
+                
+                <textarea id="json-content" placeholder="Or paste your JSON content here..."></textarea>
+                
+                <div class="btn-row">
+                    <button id="encrypt-btn">Encrypt</button>
+                    <button id="validate-btn">Validate JSON</button>
+                </div>
+                
+                <div id="status-encrypt" class="status hidden"></div>
+                
+                <div id="result-section" class="hidden">
+                    <h2>Encrypted Result</h2>
+                    <textarea id="encrypted-result" readonly></textarea>
+                    <div class="btn-row">
+                        <button id="download-btn">Download Encrypted File</button>
+                        <button id="copy-btn">Copy to Clipboard</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="decrypt-tab" class="tab-content">
+                <h2>Decrypt & Verify</h2>
+                <p>Test your encrypted JSON file to ensure it can be decrypted properly.</p>
+                
+                <div class="file-input-container">
+                    <label class="file-input-label">
+                        Choose Encrypted File
+                        <input type="file" id="encrypted-file" class="file-input">
+                    </label>
+                    <div id="encrypted-file-name" class="file-name">No file selected</div>
+                </div>
+                
+                <div>
+                    <label for="decrypt-password">Decryption Password:</label>
+                    <input type="password" id="decrypt-password" placeholder="Enter the password">
+                </div>
+                
+                <textarea id="encrypted-content" placeholder="Or paste your encrypted content here..."></textarea>
+                
+                <button id="decrypt-btn">Decrypt & Verify</button>
+                
+                <div id="status-decrypt" class="status hidden"></div>
+                
+                <div id="decrypted-section" class="hidden">
+                    <h2>Decrypted Content</h2>
+                    <textarea id="decrypted-result" readonly></textarea>
+                </div>
+            </div>
+            
+            <div id="help-tab" class="tab-content">
+                <h2>How to Use This Tool</h2>
+                
+                <h3>Encrypting Your JSON</h3>
+                <ol>
+                    <li>Select your <code>questions.json</code> file or paste its content in the text area</li>
+                    <li>Enter a strong password</li>
+                    <li>Click "Encrypt"</li>
+                    <li>Download the encrypted file (recommended filename: <code>questions.enc.json</code>)</li>
+                </ol>
+                
+                <h3>Using With Your Quiz</h3>
+                <p>Update your quiz URL to include the password parameter:</p>
+                <code>https://yourdomain.com/index.html?q=q1&p=yourpassword</code>
+                
+                <h3>About the Encryption</h3>
+                <p>This tool uses AES-256-GCM encryption, which is a secure authenticated encryption algorithm. The password is used to derive a key using PBKDF2 with 100,000 iterations.</p>
+                
+                <h3>File Format</h3>
+                <p>The encrypted file uses a simple custom format with a JSON structure containing:</p>
+                <ul>
+                    <li>Salt: Used for key derivation</li>
+                    <li>IV: Initialization vector for AES</li>
+                    <li>Data: The encrypted JSON data</li>
+                    <li>Auth tag: To verify the integrity of the data</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+
+        // File input handler
+        document.getElementById('json-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('file-name').textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('json-content').value = event.target.result;
+            };
+            reader.readAsText(file);
+        });
+        
+        document.getElementById('encrypted-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('encrypted-file-name').textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('encrypted-content').value = event.target.result;
+            };
+            reader.readAsText(file);
+        });
+
+        // Validate JSON button
+        document.getElementById('validate-btn').addEventListener('click', function() {
+            const jsonContent = document.getElementById('json-content').value;
+            const statusElement = document.getElementById('status-encrypt');
+            
+            try {
+                if (!jsonContent.trim()) {
+                    throw new Error('Please enter JSON content first.');
+                }
+                
+                const parsedJson = JSON.parse(jsonContent);
+                statusElement.textContent = 'JSON is valid!';
+                statusElement.className = 'status success';
+                statusElement.classList.remove('hidden');
+            } catch (e) {
+                statusElement.textContent = 'Invalid JSON: ' + e.message;
+                statusElement.className = 'status error';
+                statusElement.classList.remove('hidden');
+            }
+        });
+
+        // Encryption functionality
+        async function deriveKey(password, salt) {
+            const encoder = new TextEncoder();
+            const passwordBuffer = encoder.encode(password);
+            
+            // Import the password as a key
+            const passwordKey = await window.crypto.subtle.importKey(
+                'raw',
+                passwordBuffer,
+                { name: 'PBKDF2' },
+                false,
+                ['deriveKey']
+            );
+            
+            // Derive an AES-GCM key using PBKDF2
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                passwordKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function decryptData(encryptedObject, password) {
+            try {
+                // Parse the encrypted object if it's a string
+                const encObj = typeof encryptedObject === 'string' ? 
+                    JSON.parse(encryptedObject) : encryptedObject;
+                
+                // Check if it has the expected format
+                if (!encObj.salt || !encObj.iv || !encObj.data) {
+                    throw new Error('Invalid encrypted format');
+                }
+                
+                // Convert Base64 strings back to array buffers
+                const salt = base64ToArrayBuffer(encObj.salt);
+                const iv = base64ToArrayBuffer(encObj.iv);
+                const encryptedData = base64ToArrayBuffer(encObj.data);
+                
+                // Derive the key from the password
+                const key = await deriveKey(password, salt);
+                
+                // Decrypt the data
+                const decryptedBuffer = await window.crypto.subtle.decrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv
+                    },
+                    key,
+                    encryptedData
+                );
+                
+                // Decode the decrypted data to a UTF-8 string
+                const decoder = new TextDecoder();
+                return decoder.decode(decryptedBuffer);
+            } catch (error) {
+                throw new Error('Decryption failed: ' + error.message);
+            }
+        }
+
+        // Function to get URL parameters
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to load questions from JSON file (with decryption support)
+        async function loadQuestions() {
+            try {
+                // Check if password is provided
+                const password = getUrlParam('p');
+                
+                // Fetch the questions file
+                const response = await fetch('questions.enc.json');
+                const data = await response.text();
+                
+                // Try to parse as JSON first (could be plain JSON)
+                try {
+                    // If no password is provided or if the file is plain JSON
+                    return JSON.parse(data);
+                } catch (parseError) {
+                    // If parsing fails and we have a password, try to decrypt
+                    if (password) {
+                        try {
+                            const decryptedData = await decryptData(data, password);
+                            return JSON.parse(decryptedData);
+                        } catch (decryptError) {
+                            // If decryption fails, try loading the plain JSON file as fallback
+                            console.error('Decryption failed:', decryptError);
+                            const plainResponse = await fetch('questions.json');
+                            return await plainResponse.json();
+                        }
+                    } else {
+                        // No password and not plain JSON, try the non-encrypted file
+                        const plainResponse = await fetch('questions.json');
+                        return await plainResponse.json();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                document.getElementById('loading-container').classList.add('hidden');
+                document.getElementById('error-container').classList.remove('hidden');
+                document.getElementById('error-message').textContent = 'Could not load questions. Please check the file or password and try again.';
+                return null;
+            }
+        }
+
+        // Function to render a question
+        function renderQuestion(questionData) {
+            // Hide loading container
+            document.getElementById('loading-container').classList.add('hidden');
+            
+            // Show question section
+            document.getElementById('question-section').classList.remove('hidden');
+            
+            // Set title and question
+            document.getElementById('title').textContent = questionData.title;
+            document.getElementById('question').textContent = questionData.question;
+            
+            const inputContainer = document.getElementById('input-container');
+            inputContainer.innerHTML = '';
+
+            // Create appropriate input based on question type
+            if (questionData.type === 'text') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'text-answer';
+                input.placeholder = 'Your answer...';
+                inputContainer.appendChild(input);
+            } else if (questionData.type === 'radio') {
+                questionData.answers.forEach((answerText, index) => {
+                    const radioContainer = document.createElement('label');
+                    radioContainer.className = 'radio-option';
+                    
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'radio-answer';
+                    radio.value = index;
+                    radio.id = `radio-${index}`;
+                    
+                    const label = document.createTextNode(answerText);
+                    
+                    radioContainer.appendChild(radio);
+                    radioContainer.appendChild(label);
+                    inputContainer.appendChild(radioContainer);
+                });
+            }
+
+            // Reset submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.classList.remove('error');
+            submitBtn.classList.remove('hidden');
+
+            // Hide success container
+            document.getElementById('success-container').classList.add('hidden');
+        }
+
+        // Function to check answers
+        function checkAnswer(questionData) {
+            if (questionData.type === 'text') {
+                const userAnswer = document.getElementById('text-answer').value
+                    .trim().toLowerCase();
+                const correctAnswer = questionData.answer.toLowerCase();
+                return userAnswer === correctAnswer;
+            } else if (questionData.type === 'radio') {
+                const selectedRadio = document.querySelector('input[name="radio-answer"]:checked');
+                if (!selectedRadio) return false;
+                return parseInt(selectedRadio.value) === questionData.answer;
+            }
+            return false;
+        }
+
+        // Function to show success message and link
+        function showSuccess(questionData) {
+            // Hide submit button
+            document.getElementById('submit-btn').classList.add('hidden');
+            
+            // Disable inputs
+            if (questionData.type === 'text') {
+                document.getElementById('text-answer').disabled = true;
+            } else if (questionData.type === 'radio') {
+                document.querySelectorAll('input[name="radio-answer"]').forEach(radio => {
+                    radio.disabled = true;
+                });
+            }
+            
+            // Show success message
+            const successContainer = document.getElementById('success-container');
+            successContainer.classList.remove('hidden');
+            
+            document.getElementById('success-text').textContent = questionData.success_text || 'Correct!';
+            
+            // Show success link if available
+            if (questionData.success_link) {
+                const successLinkContainer = document.getElementById('success-link-container');
+                successLinkContainer.classList.remove('hidden');
+                
+                // Create link container with preview
+                const linkElement = document.createElement('div');
+                linkElement.className = 'success-link';
+                
+                // Determine if it's a map link or an image
+                const isMap = questionData.success_link.includes('google.com/maps');
+                
+                if (isMap) {
+                    // For Google Maps, create a map placeholder with icon
+                    linkElement.innerHTML = `
+                        <div class="map-placeholder">
+                            <div class="map-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="map-text">Click to open map location</div>
+                        </div>
+                    `;
+                } else {
+                    // For regular images, display directly
+                    const imgElement = document.createElement('img');
+                    imgElement.src = questionData.success_link;
+                    imgElement.alt = 'Success image';
+                    linkElement.appendChild(imgElement);
+                }
+                
+                // Add click handler
+                linkElement.addEventListener('click', function() {
+                    window.open(questionData.success_link, '_blank');
+                });
+                
+                // Add to container
+                successLinkContainer.innerHTML = '';
+                successLinkContainer.appendChild(linkElement);
+            }
+        }
+
+        // Main function to initialize the quiz
+        async function initQuiz() {
+            const questions = await loadQuestions();
+            if (!questions) return;
+            
+            // Determine which question to show
+            let questionId = getUrlParam('q');
+            if (!questionId || !questions[questionId]) {
+                // If no question ID specified or ID is invalid, use the first question
+                questionId = Object.keys(questions)[0];
+            }
+            
+            const currentQuestion = questions[questionId];
+            renderQuestion(currentQuestion);
+            
+            // Add event listener for submit button
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.addEventListener('click', function() {
+                if (checkAnswer(currentQuestion)) {
+                    showSuccess(currentQuestion);
+                } else {
+                    // Show error and reset on input change
+                    submitBtn.classList.add('error');
+                    
+                    if (currentQuestion.type === 'text') {
+                        const textInput = document.getElementById('text-answer');
+                        const resetErrorOnChange = function() {
+                            submitBtn.classList.remove('error');
+                            textInput.removeEventListener('input', resetErrorOnChange);
+                        };
+                        textInput.addEventListener('input', resetErrorOnChange);
+                    } else if (currentQuestion.type === 'radio') {
+                        const radioInputs = document.querySelectorAll('input[name="radio-answer"]');
+                        const resetErrorOnChange = function() {
+                            submitBtn.classList.remove('error');
+                            radioInputs.forEach(radio => {
+                                radio.removeEventListener('change', resetErrorOnChange);
+                            });
+                        };
+                        radioInputs.forEach(radio => {
+                            radio.addEventListener('change', resetErrorOnChange);
+                        });
+                    }
+                }
+            });
+        }
+
+        // Initialize the quiz when the page loads
+        document.addEventListener('DOMContentLoaded', initQuiz);
+        async function deriveKey(password, salt) {
+            const encoder = new TextEncoder();
+            const passwordBuffer = encoder.encode(password);
+            
+            // Import the password as a key
+            const passwordKey = await window.crypto.subtle.importKey(
+                'raw',
+                passwordBuffer,
+                { name: 'PBKDF2' },
+                false,
+                ['deriveKey']
+            );
+            
+            // Derive an AES-GCM key using PBKDF2
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                passwordKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function encryptData(data, password) {
+            // Generate a random salt
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            
+            // Generate a random IV (Initialization Vector)
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            
+            // Derive a key from the password
+            const key = await deriveKey(password, salt);
+            
+            // Encode the data as UTF-8
+            const encoder = new TextEncoder();
+            const dataBuffer = encoder.encode(data);
+            
+            // Encrypt the data
+            const encryptedData = await window.crypto.subtle.encrypt(
+                {
+                    name: 'AES-GCM',
+                    iv: iv
+                },
+                key,
+                dataBuffer
+            );
+            
+            // Create a result object containing all necessary information
+            const result = {
+                version: 1,
+                salt: arrayBufferToBase64(salt),
+                iv: arrayBufferToBase64(iv),
+                data: arrayBufferToBase64(encryptedData)
+            };
+            
+            return JSON.stringify(result);
+        }
+
+        async function decryptData(encryptedObject, password) {
+            try {
+                // Parse the encrypted object if it's a string
+                const encObj = typeof encryptedObject === 'string' ? 
+                    JSON.parse(encryptedObject) : encryptedObject;
+                
+                // Check if it has the expected format
+                if (!encObj.salt || !encObj.iv || !encObj.data) {
+                    throw new Error('Invalid encrypted format');
+                }
+                
+                // Convert Base64 strings back to array buffers
+                const salt = base64ToArrayBuffer(encObj.salt);
+                const iv = base64ToArrayBuffer(encObj.iv);
+                const encryptedData = base64ToArrayBuffer(encObj.data);
+                
+                // Derive the key from the password
+                const key = await deriveKey(password, salt);
+                
+                // Decrypt the data
+                const decryptedBuffer = await window.crypto.subtle.decrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv
+                    },
+                    key,
+                    encryptedData
+                );
+                
+                // Decode the decrypted data to a UTF-8 string
+                const decoder = new TextDecoder();
+                return decoder.decode(decryptedBuffer);
+            } catch (error) {
+                throw new Error('Decryption failed. ' + error.message);
+            }
+        }
+
+        // Helper functions for Base64 conversion
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Encrypt button
+        document.getElementById('encrypt-btn').addEventListener('click', async function() {
+            const jsonContent = document.getElementById('json-content').value;
+            const password = document.getElementById('password').value;
+            const statusElement = document.getElementById('status-encrypt');
+            
+            try {
+                // Validate inputs
+                if (!jsonContent.trim()) {
+                    throw new Error('Please enter JSON content first.');
+                }
+                
+                if (!password.trim()) {
+                    throw new Error('Please enter a password.');
+                }
+                
+                // Validate JSON
+                JSON.parse(jsonContent);
+                
+                // Encrypt the data
+                const encryptedData = await encryptData(jsonContent, password);
+                
+                // Show the result
+                document.getElementById('encrypted-result').value = encryptedData;
+                document.getElementById('result-section').classList.remove('hidden');
+                
+                statusElement.textContent = 'Encryption successful!';
+                statusElement.className = 'status success';
+                statusElement.classList.remove('hidden');
+            } catch (e) {
+                statusElement.textContent = 'Encryption failed: ' + e.message;
+                statusElement.className = 'status error';
+                statusElement.classList.remove('hidden');
+            }
+        });
+
+        // Decrypt button
+        document.getElementById('decrypt-btn').addEventListener('click', async function() {
+            const encryptedContent = document.getElementById('encrypted-content').value;
+            const password = document.getElementById('decrypt-password').value;
+            const statusElement = document.getElementById('status-decrypt');
+            
+            try {
+                // Validate inputs
+                if (!encryptedContent.trim()) {
+                    throw new Error('Please enter encrypted content first.');
+                }
+                
+                if (!password.trim()) {
+                    throw new Error('Please enter a password.');
+                }
+                
+                // Decrypt the data
+                const decryptedData = await decryptData(encryptedContent, password);
+                
+                // Validate the decrypted JSON
+                JSON.parse(decryptedData);
+                
+                // Show the result
+                document.getElementById('decrypted-result').value = decryptedData;
+                document.getElementById('decrypted-section').classList.remove('hidden');
+                
+                statusElement.textContent = 'Decryption successful!';
+                statusElement.className = 'status success';
+                statusElement.classList.remove('hidden');
+            } catch (e) {
+                statusElement.textContent = 'Decryption failed: ' + e.message;
+                statusElement.className = 'status error';
+                statusElement.classList.remove('hidden');
+            }
+        });
+
+        // Download button
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const encryptedData = document.getElementById('encrypted-result').value;
+            if (!encryptedData) return;
+            
+            const blob = new Blob([encryptedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'questions.enc.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Copy to clipboard
+        document.getElementById('copy-btn').addEventListener('click', function() {
+            const encryptedResult = document.getElementById('encrypted-result');
+            encryptedResult.select();
+            document.execCommand('copy');
+            
+            const statusElement = document.getElementById('status-encrypt');
+            statusElement.textContent = 'Copied to clipboard!';
+            statusElement.className = 'status success';
+            statusElement.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusElement.classList.add('hidden');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
