@@ -225,49 +225,191 @@
         .hidden {
             display: none;
         }
+
+        #loading-container {
+            text-align: center;
+            margin: 50px 0;
+        }
+
+        #error-container {
+            color: var(--error-color);
+            text-align: center;
+            margin: 50px 0;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="quiz-container">
-        <h1 id="title">Loading quiz...</h1>
-        <div class="question-container">
-            <h2 id="question">Please wait...</h2>
-            <div id="input-container">
-                <!-- Input elements will be dynamically inserted here -->
-            </div>
+        <div id="loading-container">
+            <h1>Loading quiz...</h1>
+            <p>Please wait while we prepare your question.</p>
         </div>
-        <button id="submit-btn">Submit</button>
-        <div id="success-container" class="hidden">
-            <p id="success-text" class="success-message"></p>
-            <div id="success-link-container" class="hidden">
-                <!-- Success link content will be dynamically inserted here -->
+        
+        <div id="error-container" class="hidden">
+            <h1>Error</h1>
+            <p id="error-message">Could not load questions.</p>
+        </div>
+        
+        <div id="question-section" class="hidden">
+            <h1 id="title">Quiz Question</h1>
+            <div class="question-container">
+                <h2 id="question">Question goes here</h2>
+                <div id="input-container">
+                    <!-- Input elements will be dynamically inserted here -->
+                </div>
+            </div>
+            <button id="submit-btn">Submit</button>
+            <div id="success-container" class="hidden">
+                <p id="success-text" class="success-message"></p>
+                <div id="success-link-container" class="hidden">
+                    <!-- Success link content will be dynamically inserted here -->
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Helper functions for Base64 conversion
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Cryptography functions
+        async function deriveKey(password, salt) {
+            const encoder = new TextEncoder();
+            const passwordBuffer = encoder.encode(password);
+            
+            // Import the password as a key
+            const passwordKey = await window.crypto.subtle.importKey(
+                'raw',
+                passwordBuffer,
+                { name: 'PBKDF2' },
+                false,
+                ['deriveKey']
+            );
+            
+            // Derive an AES-GCM key using PBKDF2
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: 100000,
+                    hash: 'SHA-256'
+                },
+                passwordKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function decryptData(encryptedObject, password) {
+            try {
+                // Parse the encrypted object if it's a string
+                const encObj = typeof encryptedObject === 'string' ? 
+                    JSON.parse(encryptedObject) : encryptedObject;
+                
+                // Check if it has the expected format
+                if (!encObj.salt || !encObj.iv || !encObj.data) {
+                    throw new Error('Invalid encrypted format');
+                }
+                
+                // Convert Base64 strings back to array buffers
+                const salt = base64ToArrayBuffer(encObj.salt);
+                const iv = base64ToArrayBuffer(encObj.iv);
+                const encryptedData = base64ToArrayBuffer(encObj.data);
+                
+                // Derive the key from the password
+                const key = await deriveKey(password, salt);
+                
+                // Decrypt the data
+                const decryptedBuffer = await window.crypto.subtle.decrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv
+                    },
+                    key,
+                    encryptedData
+                );
+                
+                // Decode the decrypted data to a UTF-8 string
+                const decoder = new TextDecoder();
+                return decoder.decode(decryptedBuffer);
+            } catch (error) {
+                throw new Error('Decryption failed: ' + error.message);
+            }
+        }
+
         // Function to get URL parameters
         function getUrlParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(param);
         }
 
-        // Function to load questions from JSON file
+        // Function to load questions from JSON file (with decryption support)
         async function loadQuestions() {
             try {
-                const response = await fetch('questions.json');
-                const data = await response.json();
-                return data;
+                // Check if password is provided
+                const password = getUrlParam('p');
+                
+                // Fetch the questions file
+                const response = await fetch('questions.enc.json');
+                const data = await response.text();
+                
+                // Try to parse as JSON first (could be plain JSON)
+                try {
+                    // If no password is provided or if the file is plain JSON
+                    return JSON.parse(data);
+                } catch (parseError) {
+                    // If parsing fails and we have a password, try to decrypt
+                    if (password) {
+                        try {
+                            const decryptedData = await decryptData(data, password);
+                            return JSON.parse(decryptedData);
+                        } catch (decryptError) {
+                            // If decryption fails, try loading the plain JSON file as fallback
+                            console.error('Decryption failed:', decryptError);
+                            const plainResponse = await fetch('questions.json');
+                            return await plainResponse.json();
+                        }
+                    } else {
+                        // No password and not plain JSON, try the non-encrypted file
+                        const plainResponse = await fetch('questions.json');
+                        return await plainResponse.json();
+                    }
+                }
             } catch (error) {
                 console.error('Error loading questions:', error);
-                document.getElementById('title').textContent = 'Error loading quiz';
-                document.getElementById('question').textContent = 'Could not load questions. Please try again later.';
+                document.getElementById('loading-container').classList.add('hidden');
+                document.getElementById('error-container').classList.remove('hidden');
+                document.getElementById('error-message').textContent = 'Could not load questions. Please check the file or password and try again.';
                 return null;
             }
         }
 
         // Function to render a question
         function renderQuestion(questionData) {
+            // Hide loading container
+            document.getElementById('loading-container').classList.add('hidden');
+            
+            // Show question section
+            document.getElementById('question-section').classList.remove('hidden');
+            
             // Set title and question
             document.getElementById('title').textContent = questionData.title;
             document.getElementById('question').textContent = questionData.question;
