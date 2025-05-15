@@ -368,31 +368,19 @@
                 const password = getUrlParam('p');
                 
                 // Fetch the questions file
-                const response = await fetch('questions.enc.json');
-                const data = await response.text();
-                
-                // Try to parse as JSON first (could be plain JSON)
-                try {
-                    // If no password is provided or if the file is plain JSON
-                    return JSON.parse(data);
-                } catch (parseError) {
-                    // If parsing fails and we have a password, try to decrypt
-                    if (password) {
-                        try {
-                            const decryptedData = await decryptData(data, password);
-                            return JSON.parse(decryptedData);
-                        } catch (decryptError) {
-                            // If decryption fails, try loading the plain JSON file as fallback
-                            console.error('Decryption failed:', decryptError);
-                            const plainResponse = await fetch('questions.json');
-                            return await plainResponse.json();
-                        }
-                    } else {
-                        // No password and not plain JSON, try the non-encrypted file
-                        const plainResponse = await fetch('questions.json');
-                        return await plainResponse.json();
-                    }
+         
+                // If parsing fails and we have a password, try to decrypt
+                if (password) {
+                    const response = await fetch('questions.enc.json');
+                    const data = await response.text();   
+                    const decryptedData = await decryptData(data, password);
+                    return JSON.parse(decryptedData);
+                } else {
+                    // No password and not plain JSON, try the non-encrypted file
+                    const plainResponse = await fetch('questions.json');
+                    return await plainResponse.json();
                 }
+                
             } catch (error) {
                 console.error('Error loading questions:', error);
                 document.getElementById('loading-container').classList.add('hidden');
