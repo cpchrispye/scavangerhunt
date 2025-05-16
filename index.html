@@ -469,19 +469,12 @@
                 // If we have a password, try to decrypt the encrypted file
                  if (password) {
                     const response = await fetch('questions.enc.json');
-                    try {
-                    const data = await response.text();   
-                        const response = await fetch('questions.enc.json');
+                    const data = await response.text();  
                     const decryptedData = await decryptData(data, password);
-                        const data = await response.text();   
-                    return JSON.parse(decryptedData);
-                        const decryptedData = await decryptData(data, password);
+                    return JSON.parse(decryptedData);                        
                 } else {
-                        return JSON.parse(decryptedData);
                     // No password and not plain JSON, try the non-encrypted file
-                    } catch (error) {
                     const plainResponse = await fetch('questions.json');
-                        console.error('Decryption failed, trying plain file:', error);
                     return await plainResponse.json();
                     }
                  }
