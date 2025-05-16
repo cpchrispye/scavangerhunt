@@ -476,8 +476,7 @@
                     // No password and not plain JSON, try the non-encrypted file
                     const plainResponse = await fetch('questions.json');
                     return await plainResponse.json();
-                    }
-                 }
+                }                
                 
             } catch (error) {
                 console.error('Error loading questions:', error);
