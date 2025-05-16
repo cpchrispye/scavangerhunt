@@ -1,10 +1,10 @@
 {
   "q1": {
     "title": "City Landmarks",
-    "question": "What famous bridge has towers that are 746 feet tall and was completed in 1937?",
+    "question": "# What is the meaning of life\nThink with regards to holding a towel",
     "type": "text",
-    "answer": "Golden Gate Bridge",
-    "success_text": "Correct! Head to the nearest park entrance.",
+    "answer": "42",
+    "success_text": "# Correct!\n well done!\n ![Sonny and Mariel high fiving.](https://content.codecademy.com/courses/learn-cpp/community-challenge/highfive.gif)",
     "success_link": "https://www.google.com/maps/search/nearest+park"
   },
   "q2": {
